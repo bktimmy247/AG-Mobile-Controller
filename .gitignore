@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+pc-controller/.state/
+mobile-expo/.expo/
+mobile-expo/dist/
+pc-controller/.state-token.txt
+mobile-expo/package-lock.json
