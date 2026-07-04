@@ -61,7 +61,8 @@ async function sendPrompt(prompt, options={}){
   await fs.writeFile(promptFile, prompt, 'utf8');
   const script = path.join(__dirname, 'scripts', 'send-prompt.ps1');
   const enter = options.enter === false ? '0' : '1';
-  const result = await ps(script, [promptFile, options.windowHint || WINDOW_HINT, enter], 45000);
+  const focusMode = options.focusMode || 'none';
+  const result = await ps(script, [promptFile, options.windowHint || WINDOW_HINT, enter, focusMode], 45000);
   await appendHistory({ id, type:'send-prompt', promptPreview:prompt.slice(0,300), result });
   return { id, ok: result.exitCode === 0, result };
 }
@@ -86,7 +87,7 @@ const server = http.createServer(async (req,res)=>{
     if(url.pathname === '/send-prompt' && req.method === 'POST'){
       const body = await readJson(req);
       if(!body.prompt || typeof body.prompt !== 'string') return send(res, 400, { error:'prompt required' });
-      const out = await sendPrompt(body.prompt, { enter: body.enter !== false, windowHint: body.windowHint });
+      const out = await sendPrompt(body.prompt, { enter: body.enter !== false, windowHint: body.windowHint, focusMode: body.focusMode });
       return send(res, out.ok ? 200 : 500, out);
     }
     if(url.pathname === '/screenshot'){

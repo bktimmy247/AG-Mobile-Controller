@@ -1,8 +1,8 @@
 # AG Mobile Controller
 
-Control **Antigravity** (or any window) on your Windows PC from your **iPhone**, over a private **Tailscale** network. Send prompts, take screenshots, and view your PC screen — all from your phone.
+Control **Antigravity, Cursor, Claude Code, Codex, or any desktop app** on your Windows PC from your **iPhone**, over a private **Tailscale** network. Send typed or voice-dictated prompts, take screenshots, and view your PC screen — all from your phone.
 
-> Điều khiển **Antigravity** trên PC Windows từ **iPhone** qua mạng riêng **Tailscale**. Gửi prompt, chụp màn hình, xem màn hình PC ngay trên điện thoại.
+> Điều khiển **Antigravity, Cursor, Claude Code, Codex hoặc bất kỳ app desktop nào** trên PC Windows từ **iPhone** qua mạng riêng **Tailscale**. Gửi prompt bằng gõ hoặc đọc giọng nói, chụp màn hình, xem màn hình PC ngay trên điện thoại.
 
 ![status](https://img.shields.io/badge/platform-iPhone%20%2B%20Windows-blue) ![license](https://img.shields.io/badge/license-MIT-green)
 
@@ -13,7 +13,9 @@ Control **Antigravity** (or any window) on your Windows PC from your **iPhone**,
 ### What it does
 - **PC controller** (Node.js): a tiny HTTP server on your Windows PC.
 - **Mobile app** (Expo / React Native): runs on your iPhone via Expo Go.
-- Phone sends a prompt → PC copies it to clipboard, focuses the Antigravity window, pastes, and presses Enter.
+- Phone sends a prompt → PC copies it to clipboard, focuses the selected target window, pastes, and presses Enter.
+- Built-in target presets: **Antigravity**, **Cursor**, **Claude Code**, **Codex**, plus **Custom** window title.
+- Voice-friendly input: use the iPhone keyboard microphone (dictation) in the prompt box, no native speech setup required.
 - Phone can pull a live **screenshot** of the PC and **pinch-to-zoom** it.
 - Traffic goes over **Tailscale** (private VPN), protected by a **token**.
 
@@ -25,14 +27,15 @@ iPhone (Expo Go app)
 PC Controller server (Node, port 19199)
    │  clipboard + SendKeys + screenshot
    ▼
-Antigravity window on Windows
+Target window on Windows
+(Antigravity / Cursor / Claude Code / Codex / Custom)
 ```
 
 ### Requirements
 - Windows PC with **Node.js 18+**
 - iPhone with **Expo Go** (from the App Store)
 - **Tailscale** installed on both PC and iPhone (same account)
-- The app you want to control open on the PC (default window hint: `Antigravity`)
+- The app you want to control open on the PC (Antigravity, Cursor, Claude Code, Codex, or a custom window title)
 
 ### 1. Set up Tailscale
 1. Install Tailscale on the Windows PC and log in.
@@ -68,10 +71,13 @@ Scan the QR code with **Expo Go** (open Expo Go → "Scan QR code" — the iOS C
 In the app's **Connect** section:
 - **PC Controller URL:** `http://<your-tailscale-ip>:19199`
 - **Token:** the same `AG_TOKEN` you set on the PC
+- Choose **Target app**: Antigravity / Cursor / Claude Code / Codex / Custom.
+- If you choose **Custom**, type a window title fragment (for example `Visual Studio Code`, `Terminal`, `Chrome`).
 - Tap **Save**, then **Test**. You should see `Connected: ...`.
 
 ### 5. Use it
-- Type a prompt → **Send to Antigravity** → the text is pasted into the Antigravity window and Enter is pressed.
+- Type a prompt, or tap the prompt box and use the **iPhone keyboard microphone** to dictate it.
+- Tap **Send to <target>** → the text is pasted into the selected window and Enter is pressed.
 - Tap **Refresh screen** to pull a fresh screenshot.
 - **Tap the screenshot** to open full screen and **pinch to zoom**.
 
@@ -79,7 +85,7 @@ In the app's **Connect** section:
 | Method | Path | Auth | Description |
 |-------|------|------|-------------|
 | GET | `/health` | no | Controller status |
-| POST | `/send-prompt` | yes | Body: `{ "prompt": "...", "enter": true }` |
+| POST | `/send-prompt` | yes | Body: `{ "prompt": "...", "enter": true, "windowHint": "Cursor", "focusMode": "cursor-agent" }` |
 | GET | `/screenshot?fresh=1` | yes | Returns a PNG screenshot |
 | GET | `/status` | yes | Recent prompt history |
 | POST | `/stop` | yes | Records a stop request (manual stop in v0.1) |
@@ -91,7 +97,8 @@ In the app's **Connect** section:
 - The screenshot shows your whole screen — only use over a private network.
 
 ### Troubleshooting
-- **"Window not found"** → open the target app first, or set `AG_WINDOW_HINT` to match its window title.
+- **"Window not found"** → open the target app first, choose another preset, or use **Custom** with a title fragment that matches the window.
+- **Cursor paste lands in editor/terminal** → use the built-in **Cursor** target preset. It sends a Cursor focus shortcut before paste so the text should land in the Agent/Composer prompt box. If your keymap is different, use Custom and adjust the focus mode in code.
 - **Test times out** → check Tailscale VPN is on; open `http://<ip>:19199/health` in the phone's Safari. If that fails, allow port 19199 in Windows Firewall.
 - **Red screen in Expo Go** → see the fix runbook below.
 
@@ -102,7 +109,9 @@ In the app's **Connect** section:
 ### App này làm gì
 - **PC controller** (Node.js): một server HTTP nhỏ chạy trên PC Windows.
 - **App điện thoại** (Expo / React Native): chạy trên iPhone qua Expo Go.
-- Điện thoại gửi prompt → PC copy vào clipboard, focus cửa sổ Antigravity, dán và nhấn Enter.
+- Điện thoại gửi prompt → PC copy vào clipboard, focus cửa sổ đã chọn, dán và nhấn Enter.
+- Có sẵn preset: **Antigravity**, **Cursor**, **Claude Code**, **Codex**, và **Custom** theo tên cửa sổ.
+- Nhập prompt bằng giọng nói qua **nút mic trên bàn phím iPhone** (dictation), không cần setup STT riêng.
 - Điện thoại lấy được **ảnh màn hình PC** trực tiếp và **chụm 2 ngón để phóng to**.
 - Kết nối qua **Tailscale** (VPN riêng), bảo vệ bằng **token**.
 
@@ -110,7 +119,7 @@ In the app's **Connect** section:
 - PC Windows có **Node.js 18+**
 - iPhone có **Expo Go** (tải trên App Store)
 - **Tailscale** cài trên cả PC và iPhone (cùng tài khoản)
-- Mở sẵn app cần điều khiển trên PC (mặc định tìm cửa sổ tên `Antigravity`)
+- Mở sẵn app cần điều khiển trên PC (Antigravity, Cursor, Claude Code, Codex hoặc tên cửa sổ custom)
 
 ### 1. Cài Tailscale
 1. Cài Tailscale trên PC, đăng nhập.
@@ -146,10 +155,13 @@ Quét QR bằng **Expo Go** (mở Expo Go → "Scan QR code" — camera thườn
 Ở mục **Connect** trong app:
 - **PC Controller URL:** `http://<ip-tailscale-cua-ban>:19199`
 - **Token:** đúng `AG_TOKEN` đã đặt trên PC
+- Chọn **Target app**: Antigravity / Cursor / Claude Code / Codex / Custom.
+- Nếu chọn **Custom**, nhập một phần tên cửa sổ (ví dụ `Visual Studio Code`, `Terminal`, `Chrome`).
 - Bấm **Save** rồi **Test** → thấy `Connected: ...` là ok.
 
 ### 5. Dùng
-- Gõ prompt → **Send to Antigravity** → chữ được dán vào cửa sổ Antigravity và nhấn Enter.
+- Gõ prompt, hoặc chạm vào ô prompt rồi dùng **nút mic trên bàn phím iPhone** để đọc giọng nói thành chữ.
+- Bấm **Send to <target>** → chữ được dán vào cửa sổ đã chọn và nhấn Enter.
 - Bấm **Refresh screen** để lấy ảnh màn hình mới.
 - **Chạm vào ảnh** để mở full màn hình, **chụm 2 ngón phóng to** đọc chữ nhỏ.
 
@@ -160,7 +172,8 @@ Quét QR bằng **Expo Go** (mở Expo Go → "Scan QR code" — camera thườn
 - Ảnh chụp là toàn màn hình — chỉ dùng trên mạng riêng.
 
 ### Xử lý sự cố
-- **"Window not found"** → chưa mở app đích, hoặc đặt `AG_WINDOW_HINT` khớp tên cửa sổ.
+- **"Window not found"** → chưa mở app đích, chọn preset khác, hoặc dùng **Custom** với một phần tên cửa sổ chính xác hơn.
+- **Cursor bị paste vào editor/terminal** → dùng preset **Cursor** có sẵn. Preset này gửi phím tắt focus Composer/Agent trước khi paste, để chữ vào đúng ô prompt. Nếu keymap Cursor của bạn khác, dùng Custom hoặc chỉnh focus mode trong code.
 - **Test timeout** → kiểm tra Tailscale đã bật; mở `http://<ip>:19199/health` trên Safari iPhone. Nếu cũng không vào → mở port 19199 trong Windows Firewall.
 - **Màn đỏ trong Expo Go** → xem phần fix bên dưới.
 
