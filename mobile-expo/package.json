@@ -1,8 +1,7 @@
 {
-  "name": "cd-antigravity-mobile-controller",
+  "name": "ag-mobile-controller",
   "version": "0.1.0",
   "private": true,
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -10,13 +9,12 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo/vector-icons": "^14.0.4",
-    "expo": "~52.0.0",
-    "expo-asset": "^57.0.3",
-    "expo-clipboard": "~7.0.0",
-    "expo-secure-store": "~14.0.0",
-    "expo-status-bar": "~2.0.0",
-    "react": "18.3.1",
-    "react-native": "0.76.5"
-  }
+    "expo": "~54.0.0",
+    "expo-clipboard": "~8.0.0",
+    "expo-secure-store": "~15.0.0",
+    "expo-status-bar": "~3.0.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
+  "main": "index.js"
 }

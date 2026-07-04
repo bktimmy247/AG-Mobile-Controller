@@ -1,8 +1,18 @@
+# Dependencies
 node_modules/
+
+# Secrets & local state
 .env
 *.log
 pc-controller/.state/
+pc-controller/.state-token.txt
+
+# Expo build artifacts
+.expo/
 mobile-expo/.expo/
 mobile-expo/dist/
-pc-controller/.state-token.txt
 mobile-expo/package-lock.json
+
+# Local generated
+expo-qr.png
+.cd-local-agent-studio/

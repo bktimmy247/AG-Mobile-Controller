@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Image, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as SecureStore from 'expo-secure-store';
 
@@ -14,6 +14,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [screenshotNonce, setScreenshotNonce] = useState(Date.now());
   const [history, setHistory] = useState([]);
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   const cleanUrl = useMemo(() => baseUrl.replace(/\/$/, ''), [baseUrl]);
   const headers = useMemo(() => ({
@@ -143,8 +144,10 @@ export default function App() {
 
         <View style={styles.card}>
           <Text style={styles.section}>Latest Screenshot</Text>
-          <Image source={{ uri: screenshotUrl, headers: token ? { authorization: `Bearer ${token}` } : undefined }} style={styles.image} resizeMode="contain" />
-          <Text style={styles.hint}>If image is blank, tap Refresh after sending a prompt.</Text>
+          <TouchableOpacity activeOpacity={0.85} onPress={() => setZoomOpen(true)}>
+            <Image source={{ uri: screenshotUrl, headers: token ? { authorization: `Bearer ${token}` } : undefined }} style={styles.image} resizeMode="contain" />
+          </TouchableOpacity>
+          <Text style={styles.hint}>Tap the image to open full screen and pinch to zoom. If blank, tap Refresh after sending a prompt.</Text>
         </View>
 
         <View style={styles.card}>
@@ -157,6 +160,35 @@ export default function App() {
           ))}
         </View>
       </ScrollView>
+
+      <Modal visible={zoomOpen} transparent animationType="fade" onRequestClose={() => setZoomOpen(false)}>
+        <View style={styles.zoomBackdrop}>
+          <ScrollView
+            style={styles.zoomScroll}
+            contentContainerStyle={styles.zoomContent}
+            maximumZoomScale={5}
+            minimumZoomScale={1}
+            bouncesZoom
+            centerContent
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+          >
+            <Image
+              source={{ uri: screenshotUrl, headers: token ? { authorization: `Bearer ${token}` } : undefined }}
+              style={styles.zoomImage}
+              resizeMode="contain"
+            />
+          </ScrollView>
+          <View style={styles.zoomBar}>
+            <TouchableOpacity onPress={refreshScreenshot} style={styles.zoomBtn}>
+              <Text style={styles.zoomBtnText}>Refresh</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setZoomOpen(false)} style={[styles.zoomBtn, styles.zoomClose]}>
+              <Text style={styles.zoomBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -191,5 +223,13 @@ const styles = StyleSheet.create({
   hint: { color: '#8fb7c8', fontSize: 13 },
   historyItem: { borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,.08)', paddingTop: 10, gap: 4 },
   historyTime: { color: '#8affc1', fontSize: 12, fontWeight: '700' },
-  historyText: { color: '#eaffff' }
+  historyText: { color: '#eaffff' },
+  zoomBackdrop: { flex: 1, backgroundColor: '#000' },
+  zoomScroll: { flex: 1 },
+  zoomContent: { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
+  zoomImage: { width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.82 },
+  zoomBar: { position: 'absolute', bottom: 34, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 12 },
+  zoomBtn: { backgroundColor: 'rgba(110,231,255,.92)', paddingVertical: 12, paddingHorizontal: 26, borderRadius: 14 },
+  zoomClose: { backgroundColor: 'rgba(255,255,255,.18)' },
+  zoomBtnText: { color: '#05202b', fontWeight: '900', fontSize: 15 }
 });
