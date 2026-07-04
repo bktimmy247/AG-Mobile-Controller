@@ -85,7 +85,7 @@ In the app's **Connect** section:
 | Method | Path | Auth | Description |
 |-------|------|------|-------------|
 | GET | `/health` | no | Controller status |
-| POST | `/send-prompt` | yes | Body: `{ "prompt": "...", "enter": true, "windowHint": "Cursor" }` |
+| POST | `/send-prompt` | yes | Body: `{ "prompt": "...", "enter": true, "windowHint": "Cursor", "focusMode": "cursor-agent" }` |
 | GET | `/screenshot?fresh=1` | yes | Returns a PNG screenshot |
 | GET | `/status` | yes | Recent prompt history |
 | POST | `/stop` | yes | Records a stop request (manual stop in v0.1) |
@@ -98,6 +98,7 @@ In the app's **Connect** section:
 
 ### Troubleshooting
 - **"Window not found"** → open the target app first, choose another preset, or use **Custom** with a title fragment that matches the window.
+- **Cursor paste lands in editor/terminal** → use the built-in **Cursor** target preset. It sends a Cursor focus shortcut before paste so the text should land in the Agent/Composer prompt box. If your keymap is different, use Custom and adjust the focus mode in code.
 - **Test times out** → check Tailscale VPN is on; open `http://<ip>:19199/health` in the phone's Safari. If that fails, allow port 19199 in Windows Firewall.
 - **Red screen in Expo Go** → see the fix runbook below.
 
@@ -172,6 +173,7 @@ Quét QR bằng **Expo Go** (mở Expo Go → "Scan QR code" — camera thườn
 
 ### Xử lý sự cố
 - **"Window not found"** → chưa mở app đích, chọn preset khác, hoặc dùng **Custom** với một phần tên cửa sổ chính xác hơn.
+- **Cursor bị paste vào editor/terminal** → dùng preset **Cursor** có sẵn. Preset này gửi phím tắt focus Composer/Agent trước khi paste, để chữ vào đúng ô prompt. Nếu keymap Cursor của bạn khác, dùng Custom hoặc chỉnh focus mode trong code.
 - **Test timeout** → kiểm tra Tailscale đã bật; mở `http://<ip>:19199/health` trên Safari iPhone. Nếu cũng không vào → mở port 19199 trong Windows Firewall.
 - **Màn đỏ trong Expo Go** → xem phần fix bên dưới.
 

@@ -9,11 +9,11 @@ const STORAGE_TARGET = 'ag_controller_target';
 const STORAGE_CUSTOM_HINT = 'ag_controller_custom_hint';
 
 const TARGETS = [
-  { id: 'antigravity', label: 'Antigravity', hint: 'Antigravity', template: 'Continue the current task in Antigravity. Summarize what you will do first.' },
-  { id: 'cursor', label: 'Cursor', hint: 'Cursor', template: 'Continue the current coding task in Cursor. Explain your plan briefly, then implement the fix.' },
-  { id: 'claude', label: 'Claude Code', hint: 'Claude', template: 'Continue the current task in Claude Code. First summarize the plan, then make the smallest safe change.' },
-  { id: 'codex', label: 'Codex', hint: 'Codex', template: 'Continue the current task in Codex. Inspect the repo, propose a short plan, then execute safely.' },
-  { id: 'custom', label: 'Custom', hint: '', template: 'Continue the current task. Summarize your plan first, then proceed safely.' }
+  { id: 'antigravity', label: 'Antigravity', hint: 'Antigravity', focusMode: 'none', template: 'Continue the current task in Antigravity. Summarize what you will do first.' },
+  { id: 'cursor', label: 'Cursor', hint: 'Cursor', focusMode: 'cursor-agent', template: 'Continue the current coding task in Cursor. Explain your plan briefly, then implement the fix.' },
+  { id: 'claude', label: 'Claude Code', hint: 'Claude', focusMode: 'none', template: 'Continue the current task in Claude Code. First summarize the plan, then make the smallest safe change.' },
+  { id: 'codex', label: 'Codex', hint: 'Codex', focusMode: 'none', template: 'Continue the current task in Codex. Inspect the repo, propose a short plan, then execute safely.' },
+  { id: 'custom', label: 'Custom', hint: '', focusMode: 'none', template: 'Continue the current task. Summarize your plan first, then proceed safely.' }
 ];
 
 export default function App() {
@@ -80,7 +80,7 @@ export default function App() {
       const res = await fetch(`${cleanUrl}/send-prompt`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ prompt: prompt.trim(), enter: true, windowHint: activeWindowHint })
+        body: JSON.stringify({ prompt: prompt.trim(), enter: true, windowHint: activeWindowHint, focusMode: targetConfig.focusMode || 'none' })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.result?.stderr || `HTTP ${res.status}`);
@@ -168,7 +168,7 @@ export default function App() {
               <TextInput value={customWindowHint} onChangeText={setCustomWindowHint} autoCapitalize="none" autoCorrect={false} style={styles.input} placeholder="Example: Visual Studio Code, Terminal, Chrome" placeholderTextColor="#789" />
             </>
           ) : null}
-          <Text style={styles.hint}>Active window hint: {activeWindowHint || 'not set'}</Text>
+          <Text style={styles.hint}>Active window hint: {activeWindowHint || 'not set'} • Focus mode: {targetConfig.focusMode || 'none'}</Text>
         </View>
 
         <View style={styles.card}>
